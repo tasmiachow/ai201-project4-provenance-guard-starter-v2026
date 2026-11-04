@@ -51,11 +51,15 @@ def combine_signals(model_score: float, style_score: float) -> float:
 
     The weights in config.py are placeholders. Change them, or ignore them and
     write a different rule.
+
+    The rule: a plain average, both weights 0.5 in config.py. When the signals
+    split hard (0.9 and 0.1) that lands at 0.5, which is "unsure", so neither
+    signal can call something AI on its own.
     """
-    # TODO: replace this
-    return (
+    return round(
         config.WEIGHT_MODEL_SIGNAL * model_score
-        + config.WEIGHT_STYLE_SIGNAL * style_score
+        + config.WEIGHT_STYLE_SIGNAL * style_score,
+        4,
     )
 
 
@@ -84,13 +88,21 @@ def score_to_label(score: float) -> tuple[str, str]:
     written every word themselves. Your breakout asks your group what they'd
     think if they got it on their own work. That question is the whole
     milestone.
+
+    Bands: below 0.50 human, 0.50 up to 0.65 unsure, 0.65 and up AI. Human is
+    strictly below, so a hard split averaging exactly 0.50 lands in unsure.
     """
-    # TODO: replace this — thresholds are in config.py
     if score >= config.AI_THRESHOLD:
-        return "ai", "PLACEHOLDER — write the high-confidence AI label."
-    if score <= config.HUMAN_THRESHOLD:
-        return "human", "PLACEHOLDER — write the high-confidence human label."
-    return "unsure", "PLACEHOLDER — write the unsure label."
+        return "ai", (
+            "This text has a lot in common with writing produced by AI tools. "
+            "If you wrote this yourself, you can submit an audit and we will review your request."
+        )
+    if score < config.HUMAN_THRESHOLD:
+        return "human", "Most likely written by a person."
+    return "unsure", (
+        "We can't tell whether this was written by a person or with help "
+        "from AI."
+    )
 
 
 def label_ranges() -> list[tuple[str, str]]:

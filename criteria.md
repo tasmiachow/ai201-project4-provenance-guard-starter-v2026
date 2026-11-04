@@ -42,61 +42,62 @@ Two things worth knowing before you pick numbers:
   a **miss**.
 
 ---
-## 1.
+## 1. I allow at most 1 false positive in 10.
 
 <!-- Your criterion. It must name a number. -->
 
 
 
-**Why this target:**
+**Why this target:** because on a writing site a wrong accusation costs more than a missed detection.
 
 
 
 ---
 
-## 2.
+## 2. A spread of at least 0.25
 
 <!-- Your criterion. -->
+The average combined score of 5 clearly-AI texts is at least 0.25 higher than the average of 5 clearly-human texts.
 
 
 
-**Why this target:**
+**Why this target:**  The unsure bound will be in between and this will push the boundary far enough to not produce as many false positives. If the spread is closer together we may accuse writers of ai, or let ai writing slip past.
 
 
 
 ---
 
-## 3.
+## 3. All 3 labels are reachable [human, unsure, ai]
 
 <!-- Your criterion. -->
 
+I can submit at least one text that gets each label (human, unsure, AI), and each one gets the same label in all three runs.
 
-
-**Why this target:**
+**Why this target:** If all 3 are not reachable than our detection system is flawed and never works it will always guess towards one side and unsure instead of bucketing.
 
 
 
 ---
 
-## 4.
+## 4. Every appeal on a real content ID is recorded and moves to under review
 
 <!-- Your criterion. -->
 
 
 
-**Why this target:**
+**Why this target:**  An appeal is the only thing standing between a wrong accusation and nothing at all, so it has to work every time. Anything less than 10 out of 10 means some writer was ignored.
 
 
 
 ---
 
-## 5.
+## 5. Missing text, empty text, text that's only spaces, and text over 10,000 characters each return a clear error message (not a crash) in 5 of 5 tries, and each rejection is written to the log.
 
 <!-- Your criterion. -->
 
 
 
-**Why this target:**
+**Why this target:** This happens every time "bad" input is given. If no feedback is given the user will never know why the app refused.
 
 
 
