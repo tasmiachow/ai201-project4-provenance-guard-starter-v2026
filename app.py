@@ -213,6 +213,13 @@ def submit():
             "error": "missing_text",
             "message": "No text was sent. Include the writing to check as \"text\".",
         }), 400
+    
+    if len(text) > 10000:
+        audit.log_rejection(creator_id=creator_id, reason="text_too_long")
+        return jsonify({
+            "error": "text_too_long",
+            "message": "Text is too long. Submissions must be 10,000 characters or fewer.",
+        }), 400
 
     try:
         model_score = detector.model_signal(text)
