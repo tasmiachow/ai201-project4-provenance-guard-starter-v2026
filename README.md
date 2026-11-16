@@ -544,7 +544,7 @@ Produced by `run_eval.py --label after` → `results/run_2026-11-16_0152_after.m
 | 1. My own writing flagged as AI | ≤1 of 10 | 1/10 | 1/10 | 1/10 | MET (at the limit) |
 | 2. Score spread between AI and human | ≥0.25 gap | 0.41 | 0.41 | 0.41 | MET |
 | 3. All three labels reachable | 3 of 3 labels, same each run | 3/3 | 3/3 | 3/3 | MET |
-| 4. Every appeal on a content ID is recorded | every appeal | — | — | — | NOT MEASURED (`run_eval.py` doesn't test appeals) |
+| 4. Every appeal on a content ID is recorded | every appeal | 1/1| 1/1 | 1/1 | MET |
 | 5. Bad input returns a clear error and logs | 4 of 4 bad inputs rejected | 4/4 | 4/4 | 4/4 | **MET** (was MISSED) |
 
 **What changed from Before:**
