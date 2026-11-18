@@ -591,6 +591,13 @@ It did nothing for the detection failures. The false positives, evasions and inj
 
 I'd keep the service leaning toward catching AI text, because it labelled nearly every AI-written text correctly, even text mixed with human writing, and the appeal route gives a wrongly accused writer a way to get a person to review the decision. The people who pay for that choice are honest writers whose work reads as predictable: non-native speakers, students writing to a rubric, technical writers. They carry the stress and the work of appealing a label they never deserved.
 
+
+
+## Capstone 
+
+## What this Extends
+Provenance Guard + burstiness signal to achieve a more well-rounded score on judging text.  
+
 <!-- ═════════════════════════════════════════════════════════════════════
 
      SUBMISSION CHECKLIST — unit 7

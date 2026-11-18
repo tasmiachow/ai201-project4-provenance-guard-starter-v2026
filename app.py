@@ -33,6 +33,8 @@ import config
 import detector
 import scoring
 import stylometry
+import json, time
+from datetime import datetime, timezone
 
 app = Flask(__name__)
 
@@ -51,6 +53,7 @@ app = Flask(__name__)
 # The storage backend is preconfigured, which stops Flask-Limiter printing a
 # warning on every start. In-memory is right for one laptop and wrong for
 # anything real — a restart forgets every count.
+
 
 class _LimiterOff:
     """
@@ -152,6 +155,38 @@ def health():
 
 
 # ── YOU BUILD THIS ────────────────────────────────────────────────────────────
+CAPSTONE_LOG = "logs/capstone_runs.jsonl"
+
+def log_capstone_run(
+    *,
+    status: str,
+    creator_id: str,
+    input_chars: int,
+    duration_ms: float,
+    content_id: str | None = None,
+    model_score: float | None = None,
+    style_score: float | None = None,
+    burstiness_score: float | None = None,
+    combined_score: float | None = None,
+    label: str | None = None,
+    error: str | None = None,
+) -> None:
+    """Append a structured record with latency and all 3 signals for Unit 9."""
+    record = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "status": status,
+        "content_id": content_id,
+        "creator_id": creator_id,
+        "model_score": model_score,
+        "style_score": style_score,
+        "burstiness_score": burstiness_score,
+        "combined_score": combined_score,
+        "label": label,
+        "duration_ms": round(duration_ms, 2),
+        "error": error,
+    }
+    with open(CAPSTONE_LOG, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record) + "\n")
 
 @app.post("/submit")
 @limiter.limit(f"{config.RATE_LIMIT_PER_MINUTE}/minute;{config.RATE_LIMIT_PER_DAY}/day")
@@ -202,6 +237,7 @@ def submit():
     what should this do when `text` is missing, empty, or enormous? A crash on
     a malformed input is one of the most common real failures there is.
     """
+    t0 = time.perf_counter()
     payload = request.get_json(silent=True) or {}
     text = payload.get("text")
     creator_id = payload.get("creator_id") or "unknown"
@@ -209,6 +245,13 @@ def submit():
     # The model can't score nothing, so refuse it here rather than crash below.
     if not isinstance(text, str) or not text.strip():
         audit.log_rejection(creator_id=creator_id, reason="missing_text")
+        log_capstone_run(
+            status="rejected",
+            creator_id=creator_id,
+            duration_ms=(time.perf_counter() - t0) * 1000,
+            error="missing_text",
+        )
+        
         return jsonify({
             "error": "missing_text",
             "message": "No text was sent. Include the writing to check as \"text\".",
@@ -216,6 +259,12 @@ def submit():
     
     if len(text) > 10000:
         audit.log_rejection(creator_id=creator_id, reason="text_too_long")
+        log_capstone_run(
+            status="rejected",
+            creator_id=creator_id,
+            duration_ms=(time.perf_counter() - t0) * 1000,
+            error="text_too_long",
+        )
         return jsonify({
             "error": "text_too_long",
             "message": "Text is too long. Submissions must be 10,000 characters or fewer.",
@@ -225,12 +274,20 @@ def submit():
         model_score = detector.model_signal(text)
     except ValueError as exc:
         audit.log_rejection(creator_id=creator_id, reason="text_too_short")
+        log_capstone_run(
+            status="rejected",
+            creator_id=creator_id,
+            duration_ms=(time.perf_counter() - t0) * 1000,
+            error="text_too_short",
+        )
         return jsonify({"error": "text_too_short", "message": str(exc)}), 400
     except detector.DetectorUnavailable as exc:
         return jsonify({"error": "detector_unavailable", "message": str(exc)}), 503
 
     style_score = stylometry.style_signal(text)
+    burstiness_score = 0 #placeholder 
     combined_score = scoring.combine_signals(model_score, style_score)
+    
     guess, label = scoring.score_to_label(combined_score)
 
     # How far the score sits toward whichever end it's nearer: 0.5 at the
@@ -238,7 +295,7 @@ def submit():
     confidence = round(max(combined_score, 1 - combined_score), 4)
 
     content_id = str(uuid.uuid4())
-
+    duration_ms = (time.perf_counter() - t0) * 1000
     audit.log_decision(
         content_id=content_id,
         creator_id=creator_id,
@@ -247,6 +304,17 @@ def submit():
         style_score=style_score,
         combined_score=combined_score,
         label=label,
+    )
+    log_capstone_run(
+        status="decided",
+        content_id=content_id,
+        creator_id=creator_id,
+        model_score=model_score,
+        style_score=style_score,
+        burstiness_score=burstiness_score,
+        combined_score=combined_score,
+        label=label,
+        duration_ms=duration_ms,
     )
 
     return jsonify({
@@ -257,6 +325,7 @@ def submit():
         "model_score": model_score,
         "style_score": style_score,
         "combined_score": combined_score,
+        "duration_ms": round(duration_ms, 2),
     })
 
 
