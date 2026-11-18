@@ -596,7 +596,7 @@ I'd keep the service leaning toward catching AI text, because it labelled nearly
 ## Capstone 
 
 ## What this Extends
-Provenance Guard + burstiness signal to achieve a more well-rounded score on judging text.  
+Provenance Guard + burstiness signal to achieve a more well-rounded score on judging text samples.  
 
 <!-- ═════════════════════════════════════════════════════════════════════
 

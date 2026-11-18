@@ -161,7 +161,6 @@ def log_capstone_run(
     *,
     status: str,
     creator_id: str,
-    input_chars: int,
     duration_ms: float,
     content_id: str | None = None,
     model_score: float | None = None,
