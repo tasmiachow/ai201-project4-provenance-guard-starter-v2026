@@ -44,7 +44,8 @@ for yourself where it lands.
 import math
 
 import config
-
+import statistics
+from stylometry import sentences, words
 _model = None
 _tokenizer = None
 
@@ -133,6 +134,47 @@ def model_signal(text: str) -> float:
     # Logistic on log-perplexity. Low perplexity -> high AI score.
     score = 1.0 / (1.0 + (ppl / midpoint) ** steepness)
     return round(min(max(score, 0.0), 1.0), 4)
+
+'''
+    Capstone extension to test the burstiness of a persons writing 
+'''
+# Burstiness cut-offs, on the std dev of per-sentence log-perplexity.
+# PLACEHOLDERS: run your 5 AI and 5 human eval texts through burstiness_stdev()
+# and set these from what you actually see.
+BURST_AI = 0.30      # at or below: surprise is flat -> AI-like
+BURST_HUMAN = 1.00   # at or above: surprise is lumpy -> human-like
+
+MIN_BURST_WORDS = 3  # shorter "sentences" are too noisy to score
+
+def burstiness_stdev(text: str):
+    """Std dev of ln(perplexity) across sentences, or None if not measurable."""
+    logs = []
+    for s in sentences(text):
+        if len(words(s)) < MIN_BURST_WORDS:
+            continue
+        try:
+            logs.append(math.log(perplexity(s)))
+        except ValueError:          # too few tokens to score
+            continue
+    if len(logs) < 2:
+        return None
+    return statistics.stdev(logs)
+
+
+def burstiness_signal(text: str) -> float:
+    """
+    How much the model's surprise varies between sentences, as 0-1.
+    **Higher means more likely AI** (flat surprise), same as model_signal.
+
+    Fewer than two scorable sentences returns exactly 0.5: no evidence,
+    not an accusation and not a clearance.
+    """
+    spread = burstiness_stdev(text)
+    if spread is None:
+        return 0.5
+
+    position = (spread - BURST_AI) / (BURST_HUMAN - BURST_AI)
+    return round(1.0 - min(max(position, 0.0), 1.0), 4)
 
 
 def warm_up() -> str:

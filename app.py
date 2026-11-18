@@ -284,8 +284,8 @@ def submit():
         return jsonify({"error": "detector_unavailable", "message": str(exc)}), 503
 
     style_score = stylometry.style_signal(text)
-    burstiness_score = 0 #placeholder 
-    combined_score = scoring.combine_signals(model_score, style_score)
+    burstiness_score = detector.burstiness_signal(text)
+    combined_score = scoring.combine_signals(model_score, style_score, burstiness_score)
     
     guess, label = scoring.score_to_label(combined_score)
 
@@ -323,6 +323,7 @@ def submit():
         "label": label,
         "model_score": model_score,
         "style_score": style_score,
+        "burstiness_score": burstiness_score,
         "combined_score": combined_score,
         "duration_ms": round(duration_ms, 2),
     })

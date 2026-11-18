@@ -19,7 +19,7 @@ you claim, so that line should read `scoring.py::combine_signals`.
 import config
 
 
-def combine_signals(model_score: float, style_score: float) -> float:
+def combine_signals(model_score: float, style_score: float,  burstiness_score: float) -> float:
     """
     Combine two 0–1 signals into one 0–1 score. ← TODO (Milestone 4)
 
@@ -58,7 +58,8 @@ def combine_signals(model_score: float, style_score: float) -> float:
     """
     return round(
         config.WEIGHT_MODEL_SIGNAL * model_score
-        + config.WEIGHT_STYLE_SIGNAL * style_score,
+        + config.WEIGHT_STYLE_SIGNAL * style_score
+        + config.WEIGHT_BURSTINESS_SIGNAL * burstiness_score,
         4,
     )
 

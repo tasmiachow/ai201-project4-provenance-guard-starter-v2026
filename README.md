@@ -598,6 +598,38 @@ I'd keep the service leaning toward catching AI text, because it labelled nearly
 ## What this Extends
 Provenance Guard + burstiness signal to achieve a more well-rounded score on judging text samples.  
 
+## The Shape 
+
+C + logging
+
+## Running it 
+
+## Instrumentation
+
+
+## Criteria 
+
+| Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
+|---|---|---|---|---|---|
+| 1. The AI texts average at least 0.20 higher burstiness than the human texts, in all three trials. |   |  |  | | MISSED |
+| 2. I allow at most 1 false positive in 10. | 1 of 10 | 6/10 | 6/10 | 6/10 | MISSED |
+| 3. Burstiness is a separate measurement, not a copy of the style signal: correlation below 0.7.
+ | 10 of 10 | 10/10 | 10/10 | 10/10 | MET |
+| 4. Every decided submission records a real burstiness score in all three places it should appear. | 10 of 10 | 10/10 | 10/10 | 10/10 | MET |
+| 5.  Text with no countable sentences gets a neutral burstiness of 0.5, never a crash or an extreme score. | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
+
+
+## The Improvement
+I made it worse.
+
+## What's still broken
+
+## What It costs 
+
+
+
+
+
 <!-- ═════════════════════════════════════════════════════════════════════
 
      SUBMISSION CHECKLIST — unit 7
