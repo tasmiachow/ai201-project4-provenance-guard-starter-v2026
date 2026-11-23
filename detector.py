@@ -139,8 +139,7 @@ def model_signal(text: str) -> float:
     Capstone extension to test the burstiness of a persons writing 
 '''
 # Burstiness cut-offs, on the std dev of per-sentence log-perplexity.
-# PLACEHOLDERS: run your 5 AI and 5 human eval texts through burstiness_stdev()
-# and set these from what you actually see.
+
 BURST_AI = 0.30      # at or below: surprise is flat -> AI-like
 BURST_HUMAN = 1.00   # at or above: surprise is lumpy -> human-like
 
